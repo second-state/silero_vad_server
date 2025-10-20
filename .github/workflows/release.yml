@@ -11,7 +11,7 @@ permissions:
 jobs:
   build-x86_64:
     name: Build (x86_64, ${{ matrix.libtorch_variant }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -96,25 +96,19 @@ jobs:
 
   build-aarch64:
     name: Build (aarch64)
-    runs-on: ubuntu-latest
-    container:
-      image: debian:bookworm-slim
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Install base dependencies
         shell: bash
         run: |
           set -euo pipefail
           export DEBIAN_FRONTEND=noninteractive
-          dpkg --add-architecture arm64
-          apt-get update
-          apt-get install -y --no-install-recommends \
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
             ca-certificates \
             pkg-config \
             libssl-dev \
-            libssl-dev:arm64 \
-            gcc-aarch64-linux-gnu \
-            g++-aarch64-linux-gnu \
-            libc6-dev-arm64-cross \
+            libopenblas-dev \
             build-essential \
             git \
             curl \
@@ -127,10 +121,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl -LO https://download.pytorch.org/libtorch/cu124/libtorch-cxx11-abi-shared-with-deps-2.4.0%2Bcu124.zip
-          unzip libtorch-cxx11-abi-shared-with-deps-2.4.0%2Bcu124.zip
-          rm libtorch-cxx11-abi-shared-with-deps-2.4.0%2Bcu124.zip
-          libtorch_dir="$(pwd)/libtorch"
+          curl -LO https://github.com/second-state/libtorch-releases/releases/download/v2.4.0/libtorch-cxx11-abi-aarch64-2.4.0.tar.gz
+          tar xzvf libtorch-cxx11-abi-aarch64-2.4.0.tar.gz
+          rm libtorch-cxx11-abi-aarch64-2.4.0.tar.gz
+          libtorch_dir="$(pwd)/torch"
           echo "LIBTORCH=$libtorch_dir" >> "$GITHUB_ENV"
           if [ -n "${LD_LIBRARY_PATH:-}" ]; then
             echo "LD_LIBRARY_PATH=$libtorch_dir/lib:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
@@ -184,7 +178,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build-x86_64
-      # - build-aarch64
+      - build-aarch64
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
