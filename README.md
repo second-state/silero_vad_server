@@ -1,6 +1,6 @@
 # An API server for AI VAD
 
-This is the VAD server that is designed to wok with the [EchoKit server](https://github.com/second-state/echokit_server).
+This is the VAD server that is designed to work with the [EchoKit server](https://github.com/second-state/echokit_server).
 
 ## Install libtorch dependencies
 
